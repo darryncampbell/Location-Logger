@@ -18,6 +18,7 @@ public class Constants {
         String MAIN_ACTION = "com.darryncampbell.locationupdateservice.action.main";
         String RECORD_LOCATION = "com.darryncampbell.locationupdateservice.action.record_location";
         String FILENAME_CHANGED = "com.darryncampbell.locationupdateservice.service.filename_changed";
+        String FILETYPE_CHANGED = "com.darryncampbell.locationupdateservice.service.filetype_changed";
         String UPDATE_RECORD_NOTE = "com.darryncampbell.locationupdateservice.service.update_record";
         String POLL_INTERVAL_CHANGED = "com.darryncampbell.locationupdateservice.action.poll_interval_changed";
         String CLEAR_PINNED_LOCATIONS = "com.darryncampbell.locationupdateservice.action.clear_pinned_locations";
@@ -33,6 +34,7 @@ public class Constants {
         String LOCATION_STATUS_UPDATED = "com.darryncampbell.locationupdateservice.service.location_status_updated";
         String LOCATION_POLL_INTERVAL = "com.darryncampbell.locationupdateservice.service.location_poll_interval";
         String FILENAME = "com.darryncampbell.locationupdateservice.service.filename";
+        String FILETYPE = "com.darryncampbell.locationupdateservice.service.filetype";
         String GEOLOCATION_API_RETURNED = "com.darryncampbell.locationupdateservice.service.geolocation_api_returned";
         String GEOLOCATION_API_STATUS = "com.darryncampbell.locationupdateservice.service.geolocation_api_status";
     }
@@ -48,4 +50,7 @@ public class Constants {
         String LOG_TAG = "LocationLog";
     }
 
+    public enum OutputType {
+        CSV, GPX
+    }
 }

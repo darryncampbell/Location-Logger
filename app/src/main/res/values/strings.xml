@@ -17,6 +17,17 @@
     <string name="pref_default_file_name">location_log_001</string>
     <string name="log_filename_key">log_file_name</string>
 
+    <string name="filetype_key">filetype</string>
+    <string name="pref_title_filetype">File Output Type</string>
+    <string name="pref_default_filetype">csv</string>
+    <string-array name="pref_filetype_titles">
+        <item>CSV Format</item>
+        <item>GPX Format</item>
+    </string-array>
+    <string-array name="pref_filetype_values">
+        <item>csv</item>
+        <item>gpx</item>
+    </string-array>
 
     <!-- Settings for Location Updates -->
     <string name="location_updates">Location Updates</string>

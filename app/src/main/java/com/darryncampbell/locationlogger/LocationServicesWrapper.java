@@ -34,6 +34,7 @@ import java.util.ArrayList;
 public class LocationServicesWrapper implements
         GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, com.google.android.gms.location.LocationListener {
 
+    public static final String FUSED_PROVIDER = "fused";
 
         protected GoogleApiClient mGoogleApiClient;
         Location fusedLocation;
@@ -94,7 +95,7 @@ public class LocationServicesWrapper implements
                 if (fusedLocation != null) {
                     sendLocationUpdate(fusedLocation);
                 } else
-                    sendLocationStatusUpdate("fused", "No Location Available");
+                    sendLocationStatusUpdate(FUSED_PROVIDER, "No Location Available");
             }
             catch (SecurityException e)
             {
@@ -108,14 +109,14 @@ public class LocationServicesWrapper implements
         @Override
         public void onConnectionFailed(ConnectionResult result) {
             Log.w(Constants.LOG.LOG_TAG, "Location Services connection failed: ConnectionResult.getErrorCode() = " + result.getErrorCode());
-            sendLocationStatusUpdate("fused", "Location Services not connected");
+            sendLocationStatusUpdate(FUSED_PROVIDER, "Location Services not connected");
         }
 
 
         @Override
         public void onConnectionSuspended(int cause) {
             Log.w(Constants.LOG.LOG_TAG, "Location Services connection suspended");
-            sendLocationStatusUpdate("fused", "Location Services not connected");
+            sendLocationStatusUpdate(FUSED_PROVIDER, "Location Services not connected");
             mGoogleApiClient.connect();
         }
 

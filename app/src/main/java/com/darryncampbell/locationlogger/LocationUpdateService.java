@@ -37,6 +37,7 @@ public class LocationUpdateService extends Service {
     ArrayList<LocationRecord> locationRecordsArray = new ArrayList<>();
     private Storage storage;
     private String storageFileName = "default";
+    private Constants.OutputType mOutputType = Constants.OutputType.GPX;
 
     public LocationUpdateService() {
         storage = new Storage();
@@ -127,7 +128,16 @@ public class LocationUpdateService extends Service {
         else if (intent.getAction().equals(Constants.ACTION.FILENAME_CHANGED))
         {
             storageFileName = intent.getStringExtra(Constants.SERVICE_COMMS.FILENAME);
-            storage.persistLocationRecordsToFile(getApplicationContext(), locationRecordsArray, storageFileName);
+            storage.persistLocationRecordsToFile(getApplicationContext(), locationRecordsArray, storageFileName, mOutputType);
+        }
+        else if (intent.getAction().equals(Constants.ACTION.FILETYPE_CHANGED))
+        {
+            String tempFileType = intent.getStringExtra(Constants.SERVICE_COMMS.FILETYPE);
+            if (tempFileType.equalsIgnoreCase("csv"))
+                mOutputType = Constants.OutputType.CSV;
+            else
+                mOutputType = Constants.OutputType.GPX;
+            storage.persistLocationRecordsToFile(getApplicationContext(), locationRecordsArray, storageFileName, mOutputType);
         }
         else if (intent.getAction().equals(Constants.ACTION.STOP_LOCATION_UPDATE_SERVICE))
         {
@@ -267,7 +277,7 @@ public class LocationUpdateService extends Service {
     }
 
     private void saveRecordsToFile() {
-        storage.persistLocationRecordsToFile(getApplicationContext(), locationRecordsArray, storageFileName);
+        storage.persistLocationRecordsToFile(getApplicationContext(), locationRecordsArray, storageFileName, mOutputType);
     }
 
     @Override

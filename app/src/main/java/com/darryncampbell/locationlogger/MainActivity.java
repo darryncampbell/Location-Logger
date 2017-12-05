@@ -38,6 +38,7 @@ import java.io.File;
 import java.nio.file.WatchKey;
 import java.util.ArrayList;
 
+import static com.darryncampbell.locationlogger.Constants.SERVICE_COMMS.FILETYPE;
 import static com.darryncampbell.locationlogger.Constants.SERVICE_COMMS.LOCATION_POLL_INTERVAL;
 
 public class MainActivity extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
@@ -53,6 +54,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     private Location mLastNetworkLocation = null;
     private Location mLastFusedLocation = null;
     private Location mLastApBasedLocation = null;
+    private Constants.OutputType mOutputType = Constants.OutputType.GPX;
 
 
     @Override
@@ -64,6 +66,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         locationRecordingDialog = new ProgressDialog(this);
 
         setLogFileName();
+        setFileType();
         setLocationFrequency();
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
@@ -104,14 +107,22 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
             Intent sharingIntent = new Intent(Intent.ACTION_SEND);
             File path = Environment.getExternalStoragePublicDirectory(
                     Environment.DIRECTORY_DOCUMENTS);
-            File file = new File(path, mLocationLogFileName + ".csv");
+            File file;
+            String type = "text/csv";
+            if (mOutputType == Constants.OutputType.CSV)
+                file = new File(path, mLocationLogFileName + ".csv");
+            else
+            {
+                file = new File(path, mLocationLogFileName + ".gpx");
+                type = "text/plain";
+            }
             Uri fileUri;
             if (Build.VERSION.SDK_INT > 21) { //use this if Lollipop_Mr1 (API 22) or above
                 fileUri = FileProvider.getUriForFile(getApplicationContext(), getPackageName()+".fileprovider", file);
             } else {
                 fileUri = Uri.fromFile(file);
             }
-            sharingIntent.setType("txt/csv");
+            sharingIntent.setType(type);
             sharingIntent.putExtra(Intent.EXTRA_STREAM, fileUri);
             startActivity(Intent.createChooser(sharingIntent, "Share Log file using"));
         }
@@ -182,6 +193,17 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
             else
                 getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         }
+        else if (key.equals(getString(R.string.filetype_key)))
+        {
+            String fileTypeAsString = setFileType();
+            if (mLocationLoggingActive)
+            {
+                Intent startIntent = new Intent(MainActivity.this, LocationUpdateService.class);
+                startIntent.putExtra(FILETYPE, fileTypeAsString);
+                startIntent.setAction(Constants.ACTION.FILETYPE_CHANGED);
+                startService(startIntent);
+            }
+        }
     }
 
     private void setLogFileName()
@@ -194,6 +216,16 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     {
         SharedPreferences SP = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
         mLocationPollFrequency = SP.getString(getString(R.string.location_frequency_key), getString(R.string.pref_default_location_frequency));
+    }
+    private String setFileType()
+    {
+        SharedPreferences SP = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+        String tempOutputType = SP.getString(getString(R.string.filetype_key), getString(R.string.pref_default_filetype));
+        if (tempOutputType.equalsIgnoreCase("csv"))
+            mOutputType = Constants.OutputType.CSV;
+        else
+            mOutputType= Constants.OutputType.GPX;
+        return tempOutputType;
     }
 
     @Override
@@ -307,7 +339,13 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
                 startIntent.putExtra(LOCATION_POLL_INTERVAL, mLocationPollFrequency);
                 startIntent.putExtra(Constants.SERVICE_COMMS.FILENAME, mLocationLogFileName);
                 startIntent.setAction(Constants.ACTION.START_LOCATION_UPDATE_SERVCIE);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    startForegroundService(startIntent);
+                }
+                else
+                {
                 startService(startIntent);
+                }
                 mLocationLoggingActive = true;
             }
         }

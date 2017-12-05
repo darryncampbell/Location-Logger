@@ -1,6 +1,7 @@
 package com.darryncampbell.locationlogger;
 
 import android.content.Context;
+import android.location.LocationManager;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Build;
@@ -24,11 +25,15 @@ import java.util.ArrayList;
 
 public class Storage {
 
-    Boolean persistLocationRecordsToFile(Context context, ArrayList<LocationRecord> locationRecords, String fileName)
+    Boolean persistLocationRecordsToFile(Context context, ArrayList<LocationRecord> locationRecords, String fileName, Constants.OutputType outputType)
     {
         File path = Environment.getExternalStoragePublicDirectory(
                 Environment.DIRECTORY_DOCUMENTS);
-        File file = new File(path, fileName + ".csv");
+        File file;
+        if (outputType == Constants.OutputType.CSV)
+            file = new File(path, fileName + ".csv");
+        else
+            file = new File(path, fileName + ".gpx");
         Boolean isWriteable = isExternalStorageWritable();
         if (isWriteable)
         {
@@ -41,15 +46,49 @@ public class Storage {
                     Log.i(Constants.LOG.LOG_TAG, "Log file location: " + file.getAbsolutePath());
                     String newLine = "\n";
                     OutputStream os = new FileOutputStream(file);
+                    if (outputType == Constants.OutputType.CSV)
+                    {
                     String deviceInformation = "Device Model: " + Build.MODEL + newLine +
                             "Build Number: " + Build.ID + newLine + "Serial Number: " + Build.SERIAL + newLine;
                     os.write(deviceInformation.getBytes());
-                    os.write(LocationRecord.CSVHeaderRow().getBytes());
+                        os.write(CSVHeaderRow().getBytes());
                     os.write(newLine.getBytes());
                     for (int i = 0; i < locationRecords.size(); i++)
                     {
                         os.write(locationRecords.get(i).CSVRow().getBytes());
                         os.write(newLine.getBytes());
+                        }
+                    }
+                    else
+                    {
+                        String gpx = GPXHeader("Location Logger.  Device Model: " + Build.MODEL +
+                                ", Build Number: " + Build.ID + ", Serial Number: " + Build.SERIAL);
+                        gpx += GPXTrackStart("GPS Location Positions");
+                        for (int i = 0; i < locationRecords.size(); i++)
+                        {
+                            gpx += locationRecords.get(i).convertLocationToGPXString(LocationManager.GPS_PROVIDER);
+                        }
+                        gpx += GPXTrackEnd();
+                        gpx += GPXTrackStart("Network Location Positions");
+                        for (int i = 0; i < locationRecords.size(); i++)
+                        {
+                            gpx += locationRecords.get(i).convertLocationToGPXString(LocationManager.NETWORK_PROVIDER);
+                        }
+                        gpx += GPXTrackEnd();
+                        gpx += GPXTrackStart("Fused Location Positions");
+                        for (int i = 0; i < locationRecords.size(); i++)
+                        {
+                            gpx += locationRecords.get(i).convertLocationToGPXString(LocationServicesWrapper.FUSED_PROVIDER);
+                        }
+                        gpx += GPXTrackEnd();
+                        gpx += GPXTrackStart("Geolocate Location Positions");
+                        for (int i = 0; i < locationRecords.size(); i++)
+                        {
+                            gpx += locationRecords.get(i).convertLocationToGPXString(GMapsGeolocationAPIWrapper.GEOLOCATE_PROVIDER);
+                        }
+                        gpx += GPXTrackEnd();
+                        gpx += GPXFooter();
+                        os.write(gpx.getBytes());
                     }
                     os.close();
 
@@ -91,6 +130,50 @@ public class Storage {
         return true;
     }
 
+    public static String CSVHeaderRow()
+    {
+        return "Date," +
+                "Time," +
+                "GPS Latitude," +
+                "GPS Longitude," +
+                "GPS Altitude," +
+                "GPS Accuracy," +
+                "GPS Age (ms)," +
+                "Network Latitude," +
+                "Network Longitude," +
+                "Network Height," +
+                "Network Accuracy," +
+                "Network Age (ms)," +
+                "Fused Latitude," +
+                "Fused Longitude," +
+                "Fused Altitude," +
+                "Fused Accuracy," +
+                "Fused Age (ms)," +
+                "AP Based Latitude," +
+                "AP Based Longitude," +
+                "AP Based Altitude," +
+                "AP Based Accuracy," +
+                "AP Based Age (ms)," +
+                "Notes,";
+    }
+    public static String GPXHeader(String metaData)
+    {
+        return "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?>\n" +
+                "<gpx xmlns=\"http://www.topografix.com/GPX/1/1\" version=\"1.1\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd \">\n" +
+                "  <metadata>\n  " + metaData + "\n  </metadata>\n";
+    }
+    public static String GPXTrackStart(String name)
+    {
+        return "  <trk>\n" + "    <name>" + name + "</name>\n" + "    <trkseg>\n";
+    }
+    public static String GPXTrackEnd()
+    {
+        return "    </trkseg>\n" + "  </trk>\n";
+    }
+    public static String GPXFooter()
+    {
+        return  "</gpx>\n";
+    }
     public boolean isExternalStorageWritable() {
         String state = Environment.getExternalStorageState();
         if (Environment.MEDIA_MOUNTED.equals(state)) {

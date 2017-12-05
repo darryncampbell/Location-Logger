@@ -2,6 +2,7 @@ package com.darryncampbell.locationlogger;
 
 import android.annotation.TargetApi;
 import android.location.Location;
+import android.location.LocationManager;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -28,8 +29,7 @@ public class LocationRecord implements Parcelable {
     private Date mUpdateTime;
     private String mNote;
 
-    public LocationRecord(Location gpsLocation, Location networkLocation, Location fusedLocation, Location mapsLocation, String lastApBasedLocationError)
-    {
+    public LocationRecord(Location gpsLocation, Location networkLocation, Location fusedLocation, Location mapsLocation, String lastApBasedLocationError) {
         //  Any of the locations provided can be null;
         mGpsLocation = gpsLocation;
         mNetworkLocation = networkLocation;
@@ -60,75 +60,63 @@ public class LocationRecord implements Parcelable {
         mNote = in.readString();
     }
 
-    public void setNote(String newNote)
-    {
+    public void setNote(String newNote) {
         this.mNote = newNote;
     }
-    public String getNote()
-    {
+    public String getNote() {
         if (this.mNote == null)
             return "";
         else
             return this.mNote;
     }
 
-    public String getGpsLocation()
-    {
-        if (mGpsLocation == null)
-        {
+    public String getGpsLocation() {
+        if (mGpsLocation == null) {
             return "Unavailable";
-        }
-        else
-        {
+        } else {
             return convertLocationToUiString(mGpsLocation);
         }
     }
 
-    public String getNetworkLocation()
-    {
-        if (mNetworkLocation == null)
-        {
+    public String getNetworkLocation() {
+        if (mNetworkLocation == null) {
             return "Unavailable";
-        }
-        else
-        {
+        } else {
             return convertLocationToUiString(mNetworkLocation);
         }
     }
 
-    public String getFusedLocation()
-    {
-        if (mFusedLocation == null)
-        {
+    public String getFusedLocation() {
+        if (mFusedLocation == null) {
             return "Unavailable";
-        }
-        else
-        {
+        } else {
             return convertLocationToUiString(mFusedLocation);
         }
     }
 
-    public String getAPBasedLocation()
-    {
-        if (mMapsLocation == null)
-        {
+    public String getAPBasedLocation() {
+        if (mMapsLocation == null) {
             return mMapsLocationLastError;
-        }
-        else
-        {
+        } else {
             return convertLocationToUiString(mMapsLocation);
         }
     }
 
-    public String getTimestamp()
+    public String getTimestamp() {
+        if (mUpdateTime == null) {
+            return "Unavailable";
+        } else {
+            DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            return df.format(mUpdateTime);
+        }
+    }
+    public String getTimestampZulu()
     {
         if (mUpdateTime == null)
-        {
-            return "Unavailable";
-        }
+            return "";
         else
         {
-            DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
             return df.format(mUpdateTime);
         }
     }
@@ -162,9 +150,6 @@ public class LocationRecord implements Parcelable {
         }
     }
 
-    private String convertLocationToTRXString(Location location, String textWhenLocationIsNull){
-        return "Possible future enhancement?";
-    }
 
     public String CSVRow()
     {
@@ -180,32 +165,31 @@ public class LocationRecord implements Parcelable {
         return row;
     }
 
-    public static String CSVHeaderRow()
+    public String convertLocationToGPXString(String locationProvider){
+        Location location = null;
+        if (locationProvider.equals(LocationManager.GPS_PROVIDER))
+            location = mGpsLocation;
+        else if (locationProvider.equals(LocationManager.NETWORK_PROVIDER))
+            location = mNetworkLocation;
+        else if (locationProvider.equals(LocationServicesWrapper.FUSED_PROVIDER))
+            location = mFusedLocation;
+        else if (locationProvider.equals(GMapsGeolocationAPIWrapper.GEOLOCATE_PROVIDER))
+            location = mMapsLocation;
+        String newLine = "\n";
+        if (location == null)
     {
         //  The header row for the CSV output
-        return "Date," +
-                "Time," +
-                "GPS Latitude," +
-                "GPS Longitude," +
-                "GPS Altitude," +
-                "GPS Accuracy," +
-                "GPS Age (ms)," +
-                "Network Latitude," +
-                "Network Longitude," +
-                "Network Height," +
-                "Network Accuracy," +
-                "Network Age (ms)," +
-                "Fused Latitude," +
-                "Fused Longitude," +
-                "Fused Altitude," +
-                "Fused Accuracy," +
-                "Fused Age (ms)," +
-                "AP Based Latitude," +
-                "AP Based Longitude," +
-                "AP Based Altitude," +
-                "AP Based Accuracy," +
-                "AP Based Age (ms)," +
-                "Notes,";
+            return "";
+        }
+        else
+        {
+            String trackSegment = "      <trkpt lat=\"" + location.getLatitude() + "\" lon=\"" + location.getLongitude() + "\">" + newLine;
+            trackSegment += "        <ele>" + location.getAltitude() + "</ele>" + newLine;
+            trackSegment += "        <time>" + getTimestampZulu() + "</time>" + newLine;
+            trackSegment += "        <cmt>" + getNote() + "</cmt>" + newLine;
+            trackSegment += "      </trkpt>" + newLine;
+            return trackSegment;
+        }
     }
 
     //  Per StackOverflow https://stackoverflow.com/questions/15308326/how-long-ago-was-the-last-known-location-recorded
