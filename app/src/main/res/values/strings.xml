@@ -43,7 +43,7 @@
     <!--  Update frequency setting -->
     <string name="location_frequency_key">location_frequency</string>
     <string name="pref_title_update_frequency">Update frequency</string>
-    <string name="pref_default_location_frequency">30</string>
+    <string name="pref_default_location_frequency">5</string>
     <string-array name="pref_update_frequency_titles">
         <item>5 seconds</item>
         <item>10 seconds</item>

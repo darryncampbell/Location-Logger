@@ -37,7 +37,7 @@ public class LocationUpdateService extends Service {
     ArrayList<LocationRecord> locationRecordsArray = new ArrayList<>();
     private Storage storage;
     private String storageFileName = "default";
-    private Constants.OutputType mOutputType = Constants.OutputType.GPX;
+    private Constants.OutputType mOutputType = Constants.OutputType.CSV;
 
     public LocationUpdateService() {
         storage = new Storage();

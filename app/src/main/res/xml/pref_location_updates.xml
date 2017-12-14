@@ -6,7 +6,7 @@
         android:title="@string/pref_title_location_tracking_enabled" />
 
     <ListPreference
-        android:defaultValue="30"
+        android:defaultValue="5"
         android:entries="@array/pref_update_frequency_titles"
         android:entryValues="@array/pref_update_frequency_values"
         android:key="@string/location_frequency_key"

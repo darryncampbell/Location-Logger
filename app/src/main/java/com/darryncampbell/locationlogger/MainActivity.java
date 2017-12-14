@@ -36,7 +36,11 @@ import android.widget.Toast;
 
 import java.io.File;
 import java.nio.file.WatchKey;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 
 import static com.darryncampbell.locationlogger.Constants.SERVICE_COMMS.FILETYPE;
 import static com.darryncampbell.locationlogger.Constants.SERVICE_COMMS.LOCATION_POLL_INTERVAL;
@@ -152,7 +156,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        SharedPreferences SP = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+        final SharedPreferences SP = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
         if (key.equals(getString(R.string.log_filename_key)))
         {
             //  Log file name has changed
@@ -183,7 +187,24 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
             if (bLocationTracking)
                 StartLocationUpdates();
             else
+            {
+                //  Before we stop location updates, create a backup file
+                Calendar c = Calendar.getInstance();
+                Date currentTime = c.getTime();
+                DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss:S");
+                String fileNameAppend = "_" + df.format(currentTime);
+                String tempFileName = mLocationLogFileName + fileNameAppend;
+                Intent createBackupFileIntent = new Intent(MainActivity.this, LocationUpdateService.class);
+                createBackupFileIntent.putExtra(Constants.SERVICE_COMMS.FILENAME, tempFileName);
+                createBackupFileIntent.setAction(Constants.ACTION.FILENAME_CHANGED);
+                startService(createBackupFileIntent);
+                Toast.makeText(getApplicationContext(), "Location information saved as " +
+                        mLocationLogFileName + fileNameAppend, Toast.LENGTH_LONG).show();
+                //  Now, actually stop the updates since we have now backed them up
                 StopLocationUpdates();
+                locationRecordsArray.clear();
+                adapter.notifyDataSetChanged();
+            }
         }
         else if (key.equals(getString(R.string.keep_screen_on_key)))
         {
