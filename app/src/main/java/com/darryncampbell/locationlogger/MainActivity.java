@@ -15,7 +15,6 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
-import android.os.PowerManager;
 import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
@@ -29,21 +28,16 @@ import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.WindowManager;
-import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
-import java.nio.file.WatchKey;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-
-import static com.darryncampbell.locationlogger.Constants.SERVICE_COMMS.FILETYPE;
-import static com.darryncampbell.locationlogger.Constants.SERVICE_COMMS.LOCATION_POLL_INTERVAL;
 
 public class MainActivity extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
 
@@ -176,7 +170,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
             if (mLocationLoggingActive)
             {
                 Intent startIntent = new Intent(MainActivity.this, LocationUpdateService.class);
-                startIntent.putExtra(LOCATION_POLL_INTERVAL, mLocationPollFrequency);
+                startIntent.putExtra(Constants.SERVICE_COMMS.LOCATION_POLL_INTERVAL, mLocationPollFrequency);
                 startIntent.setAction(Constants.ACTION.POLL_INTERVAL_CHANGED);
                 startService(startIntent);
             }
@@ -220,7 +214,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
             if (mLocationLoggingActive)
             {
                 Intent startIntent = new Intent(MainActivity.this, LocationUpdateService.class);
-                startIntent.putExtra(FILETYPE, fileTypeAsString);
+                startIntent.putExtra(Constants.SERVICE_COMMS.FILETYPE, fileTypeAsString);
                 startIntent.setAction(Constants.ACTION.FILETYPE_CHANGED);
                 startService(startIntent);
             }
@@ -277,6 +271,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         Intent startIntent = new Intent(MainActivity.this, LocationUpdateService.class);
         startIntent.setAction(Constants.ACTION.REQUEST_LATEST_DATA);
         startService(startIntent);
+
     }
 
     @Override
@@ -357,7 +352,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
             else
             {
                 Intent startIntent = new Intent(MainActivity.this, LocationUpdateService.class);
-                startIntent.putExtra(LOCATION_POLL_INTERVAL, mLocationPollFrequency);
+                startIntent.putExtra(Constants.SERVICE_COMMS.LOCATION_POLL_INTERVAL, mLocationPollFrequency);
                 startIntent.putExtra(Constants.SERVICE_COMMS.FILENAME, mLocationLogFileName);
                 startIntent.setAction(Constants.ACTION.START_LOCATION_UPDATE_SERVCIE);
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {

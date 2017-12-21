@@ -33,7 +33,13 @@
         <service
             android:name=".LocationUpdateService"
             android:enabled="true"
-            android:exported="true"></service>
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.darryncampbell.locationlogger.SCAN" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+
+        </service>
 
         <provider
             android:name="android.support.v4.content.FileProvider"

@@ -273,6 +273,29 @@ public class LocationUpdateService extends Service {
             saveRecordsToFile();
             updateMainActivityUiWithRecordList();
         }
+        else if (intent.getAction().equals(Constants.DATAWEDGE.ACTION))
+        {
+            if (mStarted)
+            {
+                String decodedBarcode = "";
+                if (intent.hasExtra(Constants.DATAWEDGE.DATA_KEY))
+                {
+                    decodedBarcode = intent.getStringExtra(Constants.DATAWEDGE.DATA_KEY);
+                    Log.i(Constants.LOG.LOG_TAG, "Scanned Barcode: " + decodedBarcode);
+                    if (locationRecordsArray.size() > 0)
+                    {
+                        int locationRecordToUpdate = locationRecordsArray.size() - 1;
+                        locationRecordsArray.get(locationRecordToUpdate).setNote(decodedBarcode);
+                        saveRecordsToFile();
+                        updateMainActivityUiWithRecordList();
+                    }
+                    else
+                        Log.w(Constants.LOG.LOG_TAG, "No location to associate scan with");
+                }
+            }
+            else
+                Log.w(Constants.LOG.LOG_TAG, "Location is not being logged");
+        }
         return START_REDELIVER_INTENT;
     }
 

@@ -50,6 +50,12 @@ public class Constants {
         String LOG_TAG = "LocationLog";
     }
 
+    public interface DATAWEDGE
+    {
+        String ACTION = "com.darryncampbell.locationlogger.SCAN";
+        String DATA_KEY = "com.symbol.datawedge.data_string";
+    }
+
     public enum OutputType {
         CSV, GPX
     }
