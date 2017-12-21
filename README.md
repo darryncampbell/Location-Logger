@@ -14,3 +14,11 @@ There are limits associated with the key used in this app to call the Geolocate 
 ![Main app](https://raw.githubusercontent.com/darryncampbell/Location-Logger/master/screenshots/activity.png)
 ![Main app](https://raw.githubusercontent.com/darryncampbell/Location-Logger/master/screenshots/notification.png)
 
+## DataWedge Integration
+You can set the note associated with the last recorded location by scanning a barcode with DataWedge.  This requires:
+* DataWedge be configured on the device to output as follows:
+  - Action: com.darryncampbel.locationlogger.SCAN
+  - Category: default
+  - Delivery: startService
+* To be running on a Zebra mobile computer with DataWedge enabled
+* See dwprofile_Location Logger.db for the exported profile
