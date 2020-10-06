@@ -1,3 +1,6 @@
+*Please be aware that this application / sample is provided as-is for demonstration purposes without any guarantee of support*
+=========================================================
+
 # Location Logger
 This application is designed primarily to test the efficacy of the different location providers available on your Android device, **it is NOT intended to be used to track your location during hiking / biking or similar use cases**.  
 
